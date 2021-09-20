@@ -1,0 +1,115 @@
+<html>
+	<head>
+		<title>Tower Defense</title>
+		<link rel="icon" href="img/icon.png" type="image/x-icon">
+		<link rel="stylesheet" href="css/style.css">
+		<script src="js/astar.js"></script>
+		<script src="js/map.js"></script>
+		<script src="js/interface.js"></script>
+		<script src="js/enemies.js"></script>
+	</head>
+	<body>
+		<div id="main" class="centered">
+			<canvas id="layer4" width="841" height="511"></canvas>
+			<canvas id="layer3" width="841" height="511"></canvas>
+			<canvas id="layer2" width="841" height="511"></canvas>
+			<canvas id="layer1" width="841" height="511"></canvas>
+		</div>
+		<div class="centered">
+			<p>MousePosition:<span id="mousePosition"></span></p>
+		</div>
+		<div>
+			<button id="pause" onclick="pauseGame()">Pause</button>
+			<button id="resume" onclick="resumeGame()" disabled>Resume</button>
+		</div>
+		<div class="centered">
+			<p id="alert"></p>
+		</div>
+		<script>
+			var canvasi = {
+				layer4:document.getElementById('layer4'),
+				layer3:document.getElementById('layer3'),
+				layer2:document.getElementById('layer2'),
+				layer1:document.getElementById('layer1'),
+			}
+				
+			var positionTeller = document.getElementById('mousePosition')
+			var contexts = {
+				layer4:canvasi.layer4.getContext('2d'),
+				layer3:canvasi.layer3.getContext('2d'),
+				layer2:canvasi.layer2.getContext('2d'),
+				layer1:canvasi.layer1.getContext('2d')
+			}
+			var tileWidth = 40;
+			var tileHeight = 30;
+			var mouseX = 0;
+			var mouseY = 0;
+
+			canvasi.layer1.addEventListener('click',(e)=>{
+				let rect = e.target.getBoundingClientRect();
+				let x = e.clientX - rect.left
+				let y = e.clientY - rect.top
+				// highlightSquare(Math.floor(x/tileWidth),Math.floor(y/tileHeight))
+			})
+			canvasi.layer1.addEventListener('mousemove',(e)=>{
+				let rect = canvasi.layer1.getBoundingClientRect();
+				let x = e.clientX - rect.left
+				let y = e.clientY - rect.top
+				if (Math.floor(x/tileWidth) >= xLimit){
+					x = xLimit-1;
+				} else {
+					x = Math.floor(x/tileWidth)
+				}
+				if (Math.floor(y/tileHeight) >= yLimit){
+					y = yLimit-1;
+				} else {
+					y = Math.floor(y/tileHeight) 
+				}
+				updateMousePosition(x,y)
+			})
+
+			//Initialize grid
+			var yLimit = Math.floor(canvasi.layer4.height / tileHeight);
+			var xLimit = Math.floor(canvasi.layer4.width / tileWidth); 
+
+			function updateMousePosition(x,y){
+				mouseX = x;
+				mouseY = y;
+				positionTeller.innerHTML = 'X:'+mouseX + ',Y:'+mouseY
+			}
+
+			function update(){
+				let m = map.getMap()
+				if (m.length > 0){
+					if (m[mouseY][mouseX] === 0){
+						contexts.layer2.clearRect(0,0,canvasi.layer2.width,canvasi.layer2.height);
+						contexts.layer2.fillStyle = '#0A81D1';
+						contexts.layer2.fillRect(mouseX*tileWidth,mouseY*tileHeight,tileWidth,tileHeight);
+					}
+					requestAnimationFrame(update);
+				}
+			}
+
+			function pauseGame(){
+				document.getElementById('resume').disabled = false;
+				document.getElementById('pause').disabled = true;
+				enemies.pause();
+			}
+			function resumeGame(){
+				document.getElementById('resume').disabled = true;
+				document.getElementById('pause').disabled = false;
+				enemies.resume();
+			}
+			map.setMapLayer(contexts.layer4);
+			enemies.setLayer(contexts.layer3);
+			map.buildGrid(xLimit,yLimit,pathfinder.setStartingPosition,pathfinder.setEndingPosition);
+			enemies.setMap(map.getMap());
+			enemies.setPath(pathfinder.setMaps(map.getMap()));
+			interface.setInterfaceLayer(contexts.layer1);
+			interface.drawGrid(xLimit,yLimit);
+			update();
+
+
+		</script>
+	</body>
+</html>

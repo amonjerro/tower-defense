@@ -1,0 +1,30 @@
+body{
+	background:#888;
+}
+#main{
+	height:526;
+}
+canvas{
+	position:absolute;
+	top:0px;
+	left:23%;
+}
+#layer4{
+	z-index:-1;
+	background:transparent;
+}
+#layer3{
+	z-index: 0;
+	background:transparent;
+}
+#layer2{
+	z-index: 1;
+	background:transparent;
+}
+#layer1{
+	z-index: 2;
+	background:transparent;
+}
+.centered{
+	text-align:center;
+}
